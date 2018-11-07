@@ -1,13 +1,15 @@
-import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
-import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
-import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.SimpleDirectedWeightedGraph;
-import sun.security.provider.certpath.Vertex;
+	import com.sun.xml.internal.ws.api.streaming.XMLStreamReaderFactory;
+	import org.jgrapht.GraphPath;
+	import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
+		import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
+		import org.jgrapht.graph.DefaultWeightedEdge;
+		import org.jgrapht.graph.SimpleDirectedWeightedGraph;
+		import sun.security.provider.certpath.Vertex;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Set;
+		import java.util.HashSet;
+		import java.util.List;
+		import java.util.Scanner;
+		import java.util.Set;
 
 public class SkyRoutes implements IRoutes {
 
@@ -75,10 +77,16 @@ public class SkyRoutes implements IRoutes {
 //		}
 		DijkstraShortestPath<String, DefaultWeightedEdge> dijkstraAlg = new DijkstraShortestPath<>(flights);
 		ShortestPathAlgorithm.SingleSourcePaths<String, DefaultWeightedEdge> iPaths = dijkstraAlg.getPaths(start);
+		GraphPath<String, DefaultWeightedEdge> mypath = iPaths.getPath(end);
+		List<String> mylist = mypath.getVertexList();
 
-		System.out.println("Your flight path will be: \n" );
-		String temp = iPaths.getPath(end).toString();
-		myToString(temp);
+		System.out.println();
+		System.out.println("The cheapest path is: ");
+		for (int i = 0; i < mylist.size()-1; i++) {
+			System.out.println(mylist.get(i) + " -> " + mylist.get(i+1));
+
+		}
+
 		System.out.println("\nThis Flight will cost a total of: £" + iPaths.getWeight(end) + "\n");
 
 		return flights;
@@ -128,15 +136,19 @@ public class SkyRoutes implements IRoutes {
 
 	public static void main(String[] args) {
 //		SimpleDirectedWeightedGraph<String, DefaultWeightedEdge> flights = partA();
-//		Scanner startscan = new Scanner(System.in);
-//		String start = startscan.next();
-//		Scanner endscan = new Scanner(System.in);
-//		String end = endscan.next();
+		System.out.println("Please enter your starting destination");
+		Scanner startscan = new Scanner(System.in);
+		String start = startscan.next();
+		System.out.println("Please enter your final destination");
+		Scanner endscan = new Scanner(System.in);
+		String end = endscan.next();
 
-		partA("Kuala Lumpur", "Pakistan");
+		partA(start, end);
+
+//		partA("Kuala Lumpur", "Pakistan");
 
 		/**For loop Taken from Stack Overflow**/
-		
+
 
 		// TODO Auto-generated method stub
 	}
