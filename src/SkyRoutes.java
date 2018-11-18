@@ -1,25 +1,20 @@
-	import com.sun.xml.internal.ws.api.streaming.XMLStreamReaderFactory;
 	import org.jgrapht.GraphPath;
 	import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 		import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 		import org.jgrapht.graph.DefaultWeightedEdge;
 		import org.jgrapht.graph.SimpleDirectedWeightedGraph;
-		import sun.security.provider.certpath.Vertex;
+	import org.jgrapht.traverse.ClosestFirstIterator;
+	import org.jgrapht.traverse.GraphIterator;
 
-	import java.util.Formatter;
 	import java.io.FileNotFoundException;
 	import java.util.HashSet;
 		import java.util.List;
 		import java.util.Scanner;
-		import java.util.Set;
 
 public class SkyRoutes implements IRoutes {
 	SimpleDirectedWeightedGraph<String, CustomEdge> graphB = new SimpleDirectedWeightedGraph<String, CustomEdge>(CustomEdge.class);
 
-	// TO IMPLEMENT
-
-
-	public static SimpleDirectedWeightedGraph<String, DefaultWeightedEdge> partA(String start, String end) {
+	public static SimpleDirectedWeightedGraph<String, DefaultWeightedEdge> partA() {
 		SimpleDirectedWeightedGraph<String, DefaultWeightedEdge> flights = new SimpleDirectedWeightedGraph<String, DefaultWeightedEdge>(DefaultWeightedEdge.class);
 
 		String Edingburgh = "Edinburgh";
@@ -75,9 +70,13 @@ public class SkyRoutes implements IRoutes {
 		DefaultWeightedEdge edgePak = flights.addEdge(Edingburgh, Pakistan);
 		flights.setEdgeWeight(edgePak, 250);
 
-//		for(DefaultWeightedEdge e : flights.edgeSet()){
-//			System.out.println(flights.getEdgeSource(e) + " --> " + flights.getEdgeTarget(e));
-//		}
+		System.out.println("Please enter your starting destination");
+		Scanner startscan = new Scanner(System.in);
+		String start = startscan.next();
+		System.out.println("Please enter your final destination");
+		Scanner endscan = new Scanner(System.in);
+		String end = endscan.next();
+
 		DijkstraShortestPath<String, DefaultWeightedEdge> dijkstraAlg = new DijkstraShortestPath<>(flights);
 		ShortestPathAlgorithm.SingleSourcePaths<String, DefaultWeightedEdge> iPaths = dijkstraAlg.getPaths(start);
 		GraphPath<String, DefaultWeightedEdge> mypath = iPaths.getPath(end);
@@ -87,49 +86,21 @@ public class SkyRoutes implements IRoutes {
 		System.out.println("The cheapest path is: ");
 		for (int i = 0; i < mylist.size()-1; i++) {
 			System.out.println(mylist.get(i) + " -> " + mylist.get(i+1));
-
 		}
 
 		System.out.println("\nThis Flight will cost a total of: £" + iPaths.getWeight(end) + "\n");
 
 		return flights;
-
-		// TO IMPLEMENT
 	}
-
-//	@Override
-//	public String toString() {
-//		return
-//	}
 
 	public static void partB() {
-		// TO IMPLEMENT
-
-	}
-
-	public static void partC() {
-		// TO IMPLEMENT
-	}
-
-	public static void main(String[] args) {
-
 		SkyRoutes mySkyRoutes = new SkyRoutes();
-//		SimpleDirectedWeightedGraph<String, DefaultWeightedEdge> flights = partA();
-//		System.out.println("Please enter your starting destination");
-//		Scanner startscan = new Scanner(System.in);
-//		String start = startscan.next();
-//		System.out.println("Please enter your final destination");
-//		Scanner endscan = new Scanner(System.in);
-//		String end = endscan.next();
-//		partA(start, end);
-		String[] myAirlines = {"BA"};
-
 		try {
 			FlightsReader myFlight = new FlightsReader(FlightsReader.MOREAIRLINECODES);
 			HashSet<String[]> airlines = myFlight.getAirlines();
 			HashSet<String[]> flights = myFlight.getFlights();
 			HashSet<String[]> airports = myFlight.getAirports();
-			mySkyRoutes.populate(airlines, airports, flights);
+			System.out.println(mySkyRoutes.populate(airlines, airports, flights));
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -138,39 +109,34 @@ public class SkyRoutes implements IRoutes {
 		}
 
 		try {
-			mySkyRoutes.leastCost("LHR", "ISB");
+			mySkyRoutes.leastCost("LHR", "HYD");
 		} catch (SkyRoutesException e) {
 			e.printStackTrace();
 		}
 
+	}
 
-//		partA("Kuala Lumpur", "Pakistan");
+	public static void partC() {
+		// TO IMPLEMENT
+	}
 
-		/**For loop Taken from Stack Overflow**/
+	public static void main(String[] args) {
+//		partA();
+		partB();
 
-
-		// TODO Auto-generated method stub
 	}
 
 	@Override
 	public boolean populate(HashSet<String[]> airlines, HashSet<String[]> airports, HashSet<String[]> routes) {
-//		System.out.println(airports.size());
 
 		for(String[] airport:airports) {
 			graphB.addVertex(airport[0]);
 		}
 
 		for(String[] route: routes){
-			CustomEdge<String> myEdge = new CustomEdge<>(route[0], route[2], route[4], route[5]);
 			graphB.addEdge(route[1], route[3], new CustomEdge(route[0], route[2], route[4], route[5]));
-//			System.out.println(routes.size());
 		}
-
-//				for(CustomEdge e : graphB.edgeSet()){
-//			System.out.println(graphB.getEdgeSource(e) + " --> " + graphB.getEdgeTarget(e) + " The weight is " + e.getCost() + " Flight no. is " + e.getFlightNum());
-//		}
-
-		return false;
+		return true;
 	}
 
 	@Override
@@ -178,36 +144,66 @@ public class SkyRoutes implements IRoutes {
 		DijkstraShortestPath<String, CustomEdge> dijkstraAlg = new DijkstraShortestPath<>(graphB);
 		ShortestPathAlgorithm.SingleSourcePaths<String, CustomEdge> iPaths = dijkstraAlg.getPaths(from);
 
+		IRoute myRoute = new IRoute() {
+			@Override
+			public List<String> getStops() {
+				return null;
+			}
+
+			@Override
+			public List<String> getFlights() {
+				return null;
+			}
+
+			@Override
+			public int totalHop() {
+				return 0;
+			}
+
+			@Override
+			public int totalCost() {
+				return 0;
+			}
+
+			@Override
+			public int airTime() {
+				return 0;
+			}
+
+			@Override
+			public int connectingTime() {
+				return 0;
+			}
+
+			@Override
+			public int totalTime() {
+				return 0;
+			}
+		};
+
 		GraphPath<String, CustomEdge> mypath = iPaths.getPath(to);
 
-		List<String> mylist = mypath.getVertexList();
+		List<String> myVertices = mypath.getVertexList();
 		List<CustomEdge> myEdges = mypath.getEdgeList();
 		int sum = 0;
 
 		System.out.printf("Leg%7s%8s%6s%12s%8s", "Leave","At", "On", "Arrive", "At");
 		System.out.println("");
 
-//		System.out.printf("Leg");
-//		System.out.printf("%7s", "Leave");
-//		System.out.printf("%8s", "At");
-//		System.out.printf("%5s", "On");
-//		System.out.printf("%8s", "Arrive");
-//		System.out.printf("%8s", "At");
-
-		for (int i = 0; i < mylist.size()-1; i++) {
-//			System.out.println(mylist.get(i) + " -> " + mylist.get(i+1));
-			System.out.printf(i+1 +"%7s%12s%8s%5s%13s", mylist.get(i), myEdges.get(i).getStartTime(), myEdges.get(i).getFlightNum(), mylist.get(i+1), myEdges.get(i).getEndTime());
+		for (int i = 0; i < myVertices.size()-1; i++) {
+			String vert = myVertices.get(i);
+			System.out.printf(i+1 +"%7s%12s%8s%5s%13s", myVertices.get(i), myEdges.get(i).getStartTime(), myEdges.get(i).getFlightNum(), myVertices.get(i+1), myEdges.get(i).getEndTime());
 			System.out.println("");
 			sum = sum + myEdges.get(i).getCost();
 		}
 
-//		System.out.println("");
-		getAirTime(myEdges);
 		System.out.println("The total cost of this trip is: £" + sum);
+		System.out.println("The time spent in the air is: " + getAirTime(myEdges) + " minutes");
 		return null;
 	}
 
-	public void getAirTime(List<CustomEdge> myEdges){
+
+	public int getAirTime(List<CustomEdge> myEdges){
 		int total = 0;
 		for(CustomEdge myEdge:myEdges){
 			int timeStart1 = Integer.parseInt(myEdge.getStartTime().substring(0,2));
@@ -215,24 +211,57 @@ public class SkyRoutes implements IRoutes {
 			int timeEnd1 = Integer.parseInt(myEdge.getEndTime().substring(0,2));
 			int timeEnd2 = Integer.parseInt(myEdge.getEndTime().substring(2));
 
-			System.out.println(timeStart1 +" "+timeStart2 + " ,"+ timeEnd1 + " " + timeEnd2);
+			int totHours = 0;
+			int totMinues = 0;
 
+			if(timeStart1 + timeEnd1 > 24){
+				totHours = (timeStart1 + timeEnd1)%24;
+				totHours = totHours * 60;
+				totHours = totHours + (timeEnd2 - timeStart2);
+			}
+			else{
+				totHours = timeEnd1 - timeStart1;
+				totHours = (totHours * 60) + (timeEnd2 - timeStart2);
+			}
 
-
-//			int start = Integer.parseInt(myEdge.getStartTime());
-//			int end =  Integer.parseInt(myEdge.getEndTime());
-//			System.out.println(start + " " + end);
-
+			total =  total + totHours;
 		}
+		return total;
 	}
 
 	@Override
 	public IRoute leastHop(String from, String to) throws SkyRoutesException {
+		GraphIterator<String, CustomEdge> myItr = new ClosestFirstIterator<String,CustomEdge>(graphB);
 		return null;
 	}
 
 	@Override
 	public IRoute leastCost(String from, String to, List<String> excluding) throws SkyRoutesException {
+		for(String exclude:excluding){
+			graphB.removeVertex(exclude);
+		}
+
+		DijkstraShortestPath<String, CustomEdge> dijkstraAlg = new DijkstraShortestPath<>(graphB);
+		ShortestPathAlgorithm.SingleSourcePaths<String, CustomEdge> iPaths = dijkstraAlg.getPaths(from);
+
+		GraphPath<String, CustomEdge> mypath = iPaths.getPath(to);
+
+		List<String> myVertices = mypath.getVertexList();
+		List<CustomEdge> myEdges = mypath.getEdgeList();
+		int sum = 0;
+
+		System.out.printf("Leg%7s%8s%6s%12s%8s", "Leave","At", "On", "Arrive", "At");
+		System.out.println("");
+
+		for (int i = 0; i < myVertices.size()-1; i++) {
+			String vert = myVertices.get(i);
+			System.out.printf(i+1 +"%7s%12s%8s%5s%13s", myVertices.get(i), myEdges.get(i).getStartTime(), myEdges.get(i).getFlightNum(), myVertices.get(i+1), myEdges.get(i).getEndTime());
+			System.out.println("");
+			sum = sum + myEdges.get(i).getCost();
+		}
+
+		System.out.println("The total cost of this trip is: £" + sum);
+		System.out.println("The time spent in the air is: " + getAirTime(myEdges) + " minutes");
 		return null;
 	}
 

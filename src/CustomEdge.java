@@ -4,7 +4,7 @@ import org.jgrapht.graph.DefaultEdge;
 import java.lang.reflect.Array;
 import java.util.List;
 
-public class CustomEdge<V> extends DefaultEdge {
+public class CustomEdge extends DefaultEdge {
     String flightNum;
     String startTime;
     String endTime;
