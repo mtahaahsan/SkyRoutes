@@ -1,10 +1,7 @@
-import org.jgrapht.GraphPath;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DefaultWeightedEdge;
 
-import java.lang.reflect.Array;
-import java.util.List;
-
-public class CustomEdge extends DefaultEdge {
+public class CustomEdge extends DefaultWeightedEdge {
     String flightNum;
     String startTime;
     String endTime;

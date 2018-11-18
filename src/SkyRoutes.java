@@ -3,15 +3,15 @@
 		import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 		import org.jgrapht.graph.DefaultWeightedEdge;
 		import org.jgrapht.graph.SimpleDirectedWeightedGraph;
+	import org.jgrapht.graph.SimpleGraph;
+	import org.jgrapht.graph.SimpleWeightedGraph;
 	import org.jgrapht.traverse.ClosestFirstIterator;
 	import org.jgrapht.traverse.GraphIterator;
 
 	import java.io.FileNotFoundException;
-	import java.util.HashSet;
-		import java.util.List;
-		import java.util.Scanner;
+	import java.util.*;
 
-public class SkyRoutes implements IRoutes {
+	public class SkyRoutes implements IRoutes {
 	SimpleDirectedWeightedGraph<String, CustomEdge> graphB = new SimpleDirectedWeightedGraph<String, CustomEdge>(CustomEdge.class);
 
 	public static SimpleDirectedWeightedGraph<String, DefaultWeightedEdge> partA() {
@@ -108,11 +108,16 @@ public class SkyRoutes implements IRoutes {
 			e.printStackTrace();
 		}
 
+		List<String> exclude = new ArrayList<>();
+		exclude.add("DOH");
+		exclude.add("DXB");
 		try {
-			mySkyRoutes.leastCost("LHR", "HYD");
+			IRoute myRoute = mySkyRoutes.leastCost("EDI", "SYD");
 		} catch (SkyRoutesException e) {
 			e.printStackTrace();
 		}
+
+
 
 	}
 
@@ -134,7 +139,9 @@ public class SkyRoutes implements IRoutes {
 		}
 
 		for(String[] route: routes){
-			graphB.addEdge(route[1], route[3], new CustomEdge(route[0], route[2], route[4], route[5]));
+			CustomEdge myEdge = new CustomEdge(route[0], route[2], route[4], route[5]);
+			graphB.addEdge(route[1], route[3], myEdge);
+			graphB.setEdgeWeight(myEdge, Integer.parseInt(route[5]));
 		}
 		return true;
 	}
@@ -143,31 +150,48 @@ public class SkyRoutes implements IRoutes {
 	public IRoute leastCost(String from, String to) throws SkyRoutesException{
 		DijkstraShortestPath<String, CustomEdge> dijkstraAlg = new DijkstraShortestPath<>(graphB);
 		ShortestPathAlgorithm.SingleSourcePaths<String, CustomEdge> iPaths = dijkstraAlg.getPaths(from);
+		GraphPath<String, CustomEdge> mypath = iPaths.getPath(to);
+		List<CustomEdge> myEdges = mypath.getEdgeList();
+		List<String> myVertices = mypath.getVertexList();
 
 		IRoute myRoute = new IRoute() {
 			@Override
 			public List<String> getStops() {
-				return null;
+				return mypath.getVertexList();
 			}
 
 			@Override
 			public List<String> getFlights() {
-				return null;
+				List<String> flightCodes = null;
+				for (CustomEdge edge:myEdges) {
+					flightCodes.add(edge.getFlightNum());
+
+				}
+				return flightCodes;
 			}
 
 			@Override
 			public int totalHop() {
-				return 0;
+				int count = 0;
+				for(CustomEdge edge:myEdges){
+					count = count + 1;
+					System.out.println(count);
+				}
+				return count;
 			}
 
 			@Override
 			public int totalCost() {
-				return 0;
+				int sum = 0 ;
+				for(CustomEdge edge:myEdges){
+					sum = sum + edge.getCost();
+				}
+				return sum;
 			}
 
 			@Override
 			public int airTime() {
-				return 0;
+				return getAirTime(myEdges);
 			}
 
 			@Override
@@ -181,14 +205,10 @@ public class SkyRoutes implements IRoutes {
 			}
 		};
 
-		GraphPath<String, CustomEdge> mypath = iPaths.getPath(to);
-
-		List<String> myVertices = mypath.getVertexList();
-		List<CustomEdge> myEdges = mypath.getEdgeList();
-		int sum = 0;
-
 		System.out.printf("Leg%7s%8s%6s%12s%8s", "Leave","At", "On", "Arrive", "At");
 		System.out.println("");
+
+		int sum = 0;
 
 		for (int i = 0; i < myVertices.size()-1; i++) {
 			String vert = myVertices.get(i);
@@ -197,9 +217,10 @@ public class SkyRoutes implements IRoutes {
 			sum = sum + myEdges.get(i).getCost();
 		}
 
-		System.out.println("The total cost of this trip is: £" + sum);
+		System.out.println("The total cost of this trip is: £" + mypath.getWeight());
 		System.out.println("The time spent in the air is: " + getAirTime(myEdges) + " minutes");
-		return null;
+
+		return myRoute;
 	}
 
 
@@ -231,7 +252,7 @@ public class SkyRoutes implements IRoutes {
 
 	@Override
 	public IRoute leastHop(String from, String to) throws SkyRoutesException {
-		GraphIterator<String, CustomEdge> myItr = new ClosestFirstIterator<String,CustomEdge>(graphB);
+
 		return null;
 	}
 
