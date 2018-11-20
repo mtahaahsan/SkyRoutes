@@ -15,8 +15,9 @@ public interface IRoute {
 	int totalCost();
 	
 	/** Returns the total time in flight of the route */
+
 	int airTime();
-	
+
 	/** Returns the total time in connection of the route */
 	int connectingTime();
 	
