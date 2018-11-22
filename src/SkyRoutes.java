@@ -1,98 +1,111 @@
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
-import org.jgrapht.graph.DefaultDirectedWeightedGraph;
-import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.SimpleDirectedWeightedGraph;
+import org.jgrapht.graph.*;
 
 import java.io.FileNotFoundException;
 import java.util.*;
 
 public class SkyRoutes implements IRoutes {
-    DefaultDirectedWeightedGraph<String, CustomEdge> graphB = new DefaultDirectedWeightedGraph<String, CustomEdge>( CustomEdge.class);
+    DirectedWeightedMultigraph<String, CustomEdge> graphB = new DirectedWeightedMultigraph<String, CustomEdge>( CustomEdge.class);
+    HashMap<String, String> cities = new HashMap<>();
 
-    public static SimpleDirectedWeightedGraph<String, DefaultWeightedEdge> partA() {
-        SimpleDirectedWeightedGraph<String, DefaultWeightedEdge> flights = new SimpleDirectedWeightedGraph<String, DefaultWeightedEdge>(DefaultWeightedEdge.class);
+    /**
+     * This method creates a graph and populates it with strings and DefaultWeightedEdge edges
+     * It first creates all the strings that need to be added, and then adds them to the graph using the addVertex() method
+     * It then creates a DefaultWeightedEdge object, adds the edge, and then sets the weight correspondingly
+     *
+     * @return null
+     */
 
+    public static GraphPath<String, DefaultWeightedEdge> partA() {
+        //Creates a simple directed weighted graph of String vertices and DefaultWeightedEdge edges
+        SimpleDirectedWeightedGraph<String, DefaultWeightedEdge> flightsGraph = new SimpleDirectedWeightedGraph<String, DefaultWeightedEdge>(DefaultWeightedEdge.class);
+
+
+        //Creates Strings with corresponding names
         String Edingburgh = "Edinburgh";
         String Heathrow = "Heathrow";
         String Dubai = "Dubai";
         String Sydney = "Sydney";
         String KualaLumpur = "Kuala Lumpur";
 
-        flights.addVertex(Edingburgh);
-        flights.addVertex(Heathrow);
-        flights.addVertex(Dubai);
-        flights.addVertex(Sydney);
-        flights.addVertex(KualaLumpur);
+        //Adds the strings above as vertices in the graph
+        flightsGraph.addVertex(Edingburgh);
+        flightsGraph.addVertex(Heathrow);
+        flightsGraph.addVertex(Dubai);
+        flightsGraph.addVertex(Sydney);
+        flightsGraph.addVertex(KualaLumpur);
 
-        DefaultWeightedEdge edge1 = flights.addEdge(Edingburgh,Heathrow);
-        flights.setEdgeWeight(edge1, 80);
+        //Creating edge objects, adding edge, and setting edge weight
+        DefaultWeightedEdge edge1 = flightsGraph.addEdge(Edingburgh,Heathrow);
+        flightsGraph.setEdgeWeight(edge1, 80);
 
-        DefaultWeightedEdge edge1rev = flights.addEdge(Heathrow,Edingburgh);
-        flights.setEdgeWeight(edge1rev, 80);
+        DefaultWeightedEdge edge1rev = flightsGraph.addEdge(Heathrow,Edingburgh);
+        flightsGraph.setEdgeWeight(edge1rev, 80);
 
-        DefaultWeightedEdge edge2 = flights.addEdge(Heathrow, Dubai);
-        flights.setEdgeWeight(edge2, 130);
+        DefaultWeightedEdge edge2 = flightsGraph.addEdge(Heathrow, Dubai);
+        flightsGraph.setEdgeWeight(edge2, 130);
 
-        DefaultWeightedEdge edge2rev = flights.addEdge(Dubai, Heathrow);
-        flights.setEdgeWeight(edge2rev, 130);
+        DefaultWeightedEdge edge2rev = flightsGraph.addEdge(Dubai, Heathrow);
+        flightsGraph.setEdgeWeight(edge2rev, 130);
 
-        DefaultWeightedEdge edge3 = flights.addEdge(Heathrow, Sydney);
-        flights.setEdgeWeight(edge3, 570);
+        DefaultWeightedEdge edge3 = flightsGraph.addEdge(Heathrow, Sydney);
+        flightsGraph.setEdgeWeight(edge3, 570);
 
-        DefaultWeightedEdge edge3rev = flights.addEdge(Sydney, Heathrow);
-        flights.setEdgeWeight(edge3rev, 570);
+        DefaultWeightedEdge edge3rev = flightsGraph.addEdge(Sydney, Heathrow);
+        flightsGraph.setEdgeWeight(edge3rev, 570);
 
-        DefaultWeightedEdge edge4 = flights.addEdge(Dubai, KualaLumpur);
-        flights.setEdgeWeight(edge4, 170);
+        DefaultWeightedEdge edge4 = flightsGraph.addEdge(Dubai, KualaLumpur);
+        flightsGraph.setEdgeWeight(edge4, 170);
 
-        DefaultWeightedEdge edge4rev = flights.addEdge(KualaLumpur, Dubai);
-        flights.setEdgeWeight(edge4rev, 170);
+        DefaultWeightedEdge edge4rev = flightsGraph.addEdge(KualaLumpur, Dubai);
+        flightsGraph.setEdgeWeight(edge4rev, 170);
 
-        DefaultWeightedEdge edge5 = flights.addEdge(Dubai, Edingburgh);
-        flights.setEdgeWeight(edge5, 190);
+        DefaultWeightedEdge edge5 = flightsGraph.addEdge(Dubai, Edingburgh);
+        flightsGraph.setEdgeWeight(edge5, 190);
 
-        DefaultWeightedEdge edge5rev = flights.addEdge(Edingburgh, Dubai);
-        flights.setEdgeWeight(edge5rev, 190);
+        DefaultWeightedEdge edge5rev = flightsGraph.addEdge(Edingburgh, Dubai);
+        flightsGraph.setEdgeWeight(edge5rev, 190);
 
-        DefaultWeightedEdge edge6 = flights.addEdge(KualaLumpur, Sydney);
-        flights.setEdgeWeight(edge6, 150);
+        DefaultWeightedEdge edge6 = flightsGraph.addEdge(KualaLumpur, Sydney);
+        flightsGraph.setEdgeWeight(edge6, 150);
 
-        DefaultWeightedEdge edge6rev = flights.addEdge(Sydney, KualaLumpur);
-        flights.setEdgeWeight(edge6rev, 150);
+        DefaultWeightedEdge edge6rev = flightsGraph.addEdge(Sydney, KualaLumpur);
+        flightsGraph.setEdgeWeight(edge6rev, 150);
 
+        // User enters starting and final destination
         System.out.println("Please enter your starting destination");
-        Scanner startscan = new Scanner(System.in);
-        String start = startscan.next();
+        Scanner startScan = new Scanner(System.in);
+        String start = startScan.next();
         System.out.println("Please enter your final destination");
-        Scanner endscan = new Scanner(System.in);
-        String end = endscan.next();
+        Scanner endScan = new Scanner(System.in);
+        String end = endScan.next();
 
-        DijkstraShortestPath<String, DefaultWeightedEdge> dijkstraAlg = new DijkstraShortestPath<>(flights);
+        //Creates the shortest path, stores the edge-list and vertex-list, and prints the results
+        DijkstraShortestPath<String, DefaultWeightedEdge> dijkstraAlg = new DijkstraShortestPath<>(flightsGraph);
         ShortestPathAlgorithm.SingleSourcePaths<String, DefaultWeightedEdge> iPaths = dijkstraAlg.getPaths(start);
-        GraphPath<String, DefaultWeightedEdge> mypath = iPaths.getPath(end);
-        List<String> mylist = mypath.getVertexList();
+        GraphPath<String, DefaultWeightedEdge> shortestPath = iPaths.getPath(end);
+        List<String> vertexList = shortestPath.getVertexList();
 
         System.out.println();
         System.out.println("The cheapest path is: ");
-        for (int i = 0; i < mylist.size()-1; i++) {
-            System.out.println(mylist.get(i) + " -> " + mylist.get(i+1));
+        for (int i = 0; i < vertexList.size()-1; i++) {
+            System.out.println(vertexList.get(i) + " -> " + vertexList.get(i+1));
         }
+        System.out.println("\nThis Flight will cost a total of: £" + (int)iPaths.getWeight(end) + "\n");
 
-        System.out.println("\nThis Flight will cost a total of: £" + iPaths.getWeight(end) + "\n");
-
-        return flights;
+        return shortestPath;
     }
 
     public static void partB() {
         SkyRoutes mySkyRoutes = new SkyRoutes();
         try {
-            FlightsReader myFlight = new FlightsReader(FlightsReader.MOREAIRLINECODES);
+            FlightsReader myFlight = new FlightsReader(FlightsReader.AIRLINECODES);
             HashSet<String[]> airlines = myFlight.getAirlines();
             HashSet<String[]> flights = myFlight.getFlights();
             HashSet<String[]> airports = myFlight.getAirports();
-            System.out.println(mySkyRoutes.populate(airlines, airports, flights));
+            mySkyRoutes.populate(airlines, airports, flights);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -104,7 +117,8 @@ public class SkyRoutes implements IRoutes {
 //        exclude.add("DOH");
 //        exclude.add("DXB");
         try {
-            IRoute myRoute = mySkyRoutes.leastCost("JFK", "LHE");
+            IRoute myRoute = mySkyRoutes.leastCost("EDI", "DXB");
+            mySkyRoutes.leastHop("EDI", "DXB");
         } catch (SkyRoutesException e) {
             e.printStackTrace();
         }
@@ -115,8 +129,7 @@ public class SkyRoutes implements IRoutes {
     }
 
     public static void main(String[] args) {
-//		partA();
-        partB();
+		partA();
 
     }
 
@@ -125,6 +138,7 @@ public class SkyRoutes implements IRoutes {
 
         for(String[] airport:airports) {
             graphB.addVertex(airport[0]);
+            cities.put(airport[0], airport[1]);
         }
 
         int count = 0;
@@ -138,7 +152,6 @@ public class SkyRoutes implements IRoutes {
         if(count==11663){
             return true;
         }
-
         return false;
     }
 
@@ -152,14 +165,16 @@ public class SkyRoutes implements IRoutes {
 
         IRoute myRoute2 = new IRouteClass(myEdges, myVertices, mypath);
 
-        System.out.printf("Leg%7s%8s%6s%12s%8s", "Leave","At", "On", "Arrive", "At");
+        System.out.printf("%s%7s%12s%9s%12s%8s", "Leg", "Leave","At", "On", "Arrive", "At");
         System.out.println("");
 
         int sum = 0;
 
         for (int i = 0; i < myVertices.size()-1; i++) {
             String vert = myVertices.get(i);
-            System.out.printf(i+1 +"%7s%12s%8s%5s%13s", myVertices.get(i), myEdges.get(i).getStartTime(), myEdges.get(i).getFlightNum(), myVertices.get(i+1), myEdges.get(i).getEndTime());
+            String deptCity = cities.get(myVertices.get(i));
+            String arrCity = cities.get(myVertices.get(i+1));
+            System.out.printf("%-5d%-13s%-9s%-8s%-12s%-14s ",i+1, deptCity, myEdges.get(i).getStartTime(), myEdges.get(i).getFlightNum(), arrCity, myEdges.get(i).getEndTime());
             System.out.println("");
             sum = sum + myEdges.get(i).getCost();
         }
@@ -192,45 +207,71 @@ public class SkyRoutes implements IRoutes {
                 totHours = totHours*60 + (minutesEnd-minutesStart);
             }
 
-            System.out.println(totHours);
+//            System.out.println(totHours);
 
             total =  total + totHours;
         }
         return total;
     }
 
-    public int getConnectingTime(List<CustomEdge> myEdges){
+    public int getConnectingTime(List<CustomEdge> myEdges) {
         int total = 0;
         for (int i = 0; i < myEdges.size()-1; i++) {
             CustomEdge myEdge = myEdges.get(i);
-            CustomEdge nextEdge = myEdges.get(i+1);
-            int startHours = Integer.parseInt(myEdge.getEndTime().substring(0,2));
-            int startMinutes = Integer.parseInt(myEdge.getEndTime().substring(2));
-            int endHours = Integer.parseInt(nextEdge.getStartTime().substring(0,2));
-            int endMinutes = Integer.parseInt(nextEdge.getStartTime().substring(2));
+            CustomEdge myNextEdge = myEdges.get(i+1);
+            int hoursStart = Integer.parseInt(myEdge.getEndTime().substring(0, 2));
+            int minutesStart = Integer.parseInt(myEdge.getEndTime().substring(2));
+            int hoursEnd = Integer.parseInt(myNextEdge.getStartTime().substring(0, 2));
+            int minutesEnd = Integer.parseInt(myNextEdge.getStartTime().substring(2));
 
             int totHours = 0;
 
-            if(startHours + endHours > 24){
-                totHours = (startHours + startHours)%24;
-                totHours = totHours * 60;
-                totHours = totHours + (endMinutes - startMinutes);
-            }
-            else{
-                totHours = startHours - endHours;
-                totHours = (totHours * 60) + (endMinutes - startMinutes);
+            if (hoursStart > hoursEnd) {
+                hoursStart = 24 % hoursStart;
+                totHours = hoursStart + hoursEnd;
+                totHours = totHours * 60 + (minutesEnd - minutesStart);
+            } else {
+                totHours = hoursEnd - hoursStart;
+                totHours = totHours * 60 + (minutesEnd - minutesStart);
             }
 
+//            System.out.println(totHours);
 
-            total =  total + totHours;
+            total = total + totHours;
         }
         return total;
     }
 
     @Override
     public IRoute leastHop(String from, String to) throws SkyRoutesException {
+        AsUnweightedGraph<String, CustomEdge> unweightedGraphtB = new AsUnweightedGraph<String, CustomEdge>(graphB);
+        DijkstraShortestPath<String, CustomEdge> dijkstraAlg = new DijkstraShortestPath(unweightedGraphtB);
+        ShortestPathAlgorithm.SingleSourcePaths<String, CustomEdge> iPaths = dijkstraAlg.getPaths(from);
+        GraphPath<String, CustomEdge> myGraph = iPaths.getPath(to);
+        List<CustomEdge> myEdges = myGraph.getEdgeList();
+        List<String> myVertices = myGraph.getVertexList();
 
-        return null;
+        IRoute myRoute2 = new IRouteClass(myEdges, myVertices, myGraph);
+
+        System.out.printf("Leg%7s%8s%6s%12s%8s", "Leave","At", "On", "Arrive", "At");
+        System.out.println("");
+
+        int sum = 0;
+
+        for (int i = 0; i < myVertices.size()-1; i++) {
+            String vert = myVertices.get(i);
+            String deptCity = cities.get(myVertices.get(i));
+            String arrCity = cities.get(myVertices.get(i+1));
+            System.out.printf(i+1 +"%13s%9s%8s%8s%10s", deptCity, myEdges.get(i).getStartTime(), myEdges.get(i).getFlightNum(), arrCity, myEdges.get(i).getEndTime());
+            System.out.println("");
+            sum = sum + myEdges.get(i).getCost();
+        }
+
+        System.out.println("The total cost of this trip is: £" + sum);
+        System.out.println("The time spent in the air is: " + getAirTime(myEdges) + " minutes");
+//        System.out.println("The time spend waiting is: " + getConnectingTime(myEdges));
+
+        return myRoute2;
     }
 
     @Override
@@ -265,7 +306,38 @@ public class SkyRoutes implements IRoutes {
 
     @Override
     public IRoute leastHop(String from, String to, List<String> excluding) throws SkyRoutesException {
-        return null;
+        AsUnweightedGraph<String, CustomEdge> unweightedGraphtB = new AsUnweightedGraph<String, CustomEdge>(graphB);
+        DijkstraShortestPath<String, CustomEdge> dijkstraAlg = new DijkstraShortestPath(unweightedGraphtB);
+        ShortestPathAlgorithm.SingleSourcePaths<String, CustomEdge> iPaths = dijkstraAlg.getPaths(from);
+        GraphPath<String, CustomEdge> myGraph = iPaths.getPath(to);
+        List<CustomEdge> myEdges = myGraph.getEdgeList();
+        List<String> myVertices = myGraph.getVertexList();
+
+        for(String exclude:excluding){
+            unweightedGraphtB.removeVertex(exclude);
+        }
+
+        IRoute myRoute2 = new IRouteClass(myEdges, myVertices, myGraph);
+
+        System.out.printf("Leg%7s%8s%6s%12s%8s", "Leave","At", "On", "Arrive", "At");
+        System.out.println("");
+
+        int sum = 0;
+
+        for (int i = 0; i < myVertices.size()-1; i++) {
+            String vert = myVertices.get(i);
+            String deptCity = cities.get(myVertices.get(i));
+            String arrCity = cities.get(myVertices.get(i+1));
+            System.out.printf(i+1 +"%13s%9s%8s%8s%10s", deptCity, myEdges.get(i).getStartTime(), myEdges.get(i).getFlightNum(), arrCity, myEdges.get(i).getEndTime());
+            System.out.println("");
+            sum = sum + myEdges.get(i).getCost();
+        }
+
+        System.out.println("The total cost of this trip is: £" + sum);
+        System.out.println("The time spent in the air is: " + getAirTime(myEdges) + " minutes");
+//        System.out.println("The time spend waiting is: " + getConnectingTime(myEdges));
+
+        return myRoute2;
     }
 
     @Override

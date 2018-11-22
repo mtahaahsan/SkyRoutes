@@ -58,9 +58,9 @@ public class IRouteClass implements IRoute {
 
     @Override
     public int connectingTime() {
-//        return getConnectingTime(myEdges);
+        sky.getConnectingTime(myEdges);
         return 0;
-    }
+}
 
     @Override
     public int totalTime() {

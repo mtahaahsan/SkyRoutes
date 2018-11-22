@@ -1,9 +1,14 @@
 import static org.junit.Assert.*;
 
+import org.jgrapht.Graph;
+import org.jgrapht.GraphPath;
+import org.jgrapht.graph.DefaultWeightedEdge;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 public class SkyRoutesExampleTest {
 
@@ -30,5 +35,4 @@ public class SkyRoutesExampleTest {
 			fail();
 		}
 	}
-
 }
