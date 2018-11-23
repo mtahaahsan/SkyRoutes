@@ -15,7 +15,8 @@ public class SkyRoutesExampleTest {
 	IRoutes fi = new SkyRoutes();
 	FlightsReader fr;
 
-	@Before public void initialize() {
+	@Before
+	public void initialize() {
 		try {
 			fr = new FlightsReader(FlightsReader.AIRLINECODES);
 			fi.populate(fr.getAirlines(), fr.getAirports(), fr.getFlights());
@@ -24,7 +25,6 @@ public class SkyRoutesExampleTest {
 			fail();
 		}
 	}
-
 	@Test
 	public void test1() {
 		try {
@@ -35,4 +35,7 @@ public class SkyRoutesExampleTest {
 			fail();
 		}
 	}
+
+
 }
+

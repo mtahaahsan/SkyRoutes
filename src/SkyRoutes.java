@@ -15,10 +15,11 @@ public class SkyRoutes implements IRoutes {
      * It first creates all the strings that need to be added, and then adds them to the graph using the addVertex() method
      * It then creates a DefaultWeightedEdge object, adds the edge, and then sets the weight correspondingly
      *
-     * @return null
+     * @param start (Start Airport)
+     * @param end (End Airport)
+     * @return void
      */
-
-    public static GraphPath<String, DefaultWeightedEdge> partA() {
+    public static GraphPath<String, DefaultWeightedEdge> partA(String start, String end) {
         //Creates a simple directed weighted graph of String vertices and DefaultWeightedEdge edges
         SimpleDirectedWeightedGraph<String, DefaultWeightedEdge> flightsGraph = new SimpleDirectedWeightedGraph<String, DefaultWeightedEdge>(DefaultWeightedEdge.class);
 
@@ -75,12 +76,6 @@ public class SkyRoutes implements IRoutes {
         flightsGraph.setEdgeWeight(edge6rev, 150);
 
         // User enters starting and final destination
-        System.out.println("Please enter your starting destination");
-        Scanner startScan = new Scanner(System.in);
-        String start = startScan.next();
-        System.out.println("Please enter your final destination");
-        Scanner endScan = new Scanner(System.in);
-        String end = endScan.next();
 
         //Creates the shortest path, stores the edge-list and vertex-list, and prints the results
         DijkstraShortestPath<String, DefaultWeightedEdge> dijkstraAlg = new DijkstraShortestPath<>(flightsGraph);
@@ -88,59 +83,171 @@ public class SkyRoutes implements IRoutes {
         GraphPath<String, DefaultWeightedEdge> shortestPath = iPaths.getPath(end);
         List<String> vertexList = shortestPath.getVertexList();
 
-        System.out.println();
-        System.out.println("The cheapest path is: ");
+        System.out.println("\nThe cheapest path is: ");
         for (int i = 0; i < vertexList.size()-1; i++) {
             System.out.println(vertexList.get(i) + " -> " + vertexList.get(i+1));
         }
-        System.out.println("\nThis Flight will cost a total of: £" + (int)iPaths.getWeight(end) + "\n");
+        System.out.println("\nThis flight will cost a total of: £" + (int)iPaths.getWeight(end) + "\n");
 
         return shortestPath;
     }
 
-    public static void partB() {
+    /**
+     * This method allows you to find the simple least cost by first populating the graph and then calling the
+     * leastCost() method and passing the right parameters
+     *
+     * @param start (Start Airport)
+     * @param end (End Airport)
+     */
+    public static void partB(String start, String end) {
+        // Creates a new instance of SkyRoutes
         SkyRoutes mySkyRoutes = new SkyRoutes();
+
+        // Gets the HashSets from the FlightsReader class
         try {
             FlightsReader myFlight = new FlightsReader(FlightsReader.AIRLINECODES);
             HashSet<String[]> airlines = myFlight.getAirlines();
             HashSet<String[]> flights = myFlight.getFlights();
             HashSet<String[]> airports = myFlight.getAirports();
             mySkyRoutes.populate(airlines, airports, flights);
-
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (SkyRoutesException e) {
             e.printStackTrace();
         }
 
-        List<String> exclude = new ArrayList<>();
-//        exclude.add("DOH");
+        List<String> exclude = new ArrayList<String>();
+        exclude.add("MEL");
 //        exclude.add("DXB");
+
         try {
-            IRoute myRoute = mySkyRoutes.leastCost("EDI", "DXB");
-            mySkyRoutes.leastHop("EDI", "DXB");
+            mySkyRoutes.leastCost(start, end);
         } catch (SkyRoutesException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * This method first populates the graph lets you choose with part within PartC you want to choose, and
+     * correspondingly asks you to enter values, and then calls the method you chose
+     */
     public static void partC() {
-        // TO IMPLEMENT
+        SkyRoutes mySkyRoutes = new SkyRoutes();
+
+        // Gets the HashSets from the FlightsReader class
+        try {
+            FlightsReader myFlight = new FlightsReader(FlightsReader.AIRLINECODES);
+            HashSet<String[]> airlines = myFlight.getAirlines();
+            HashSet<String[]> flights = myFlight.getFlights();
+            HashSet<String[]> airports = myFlight.getAirports();
+            mySkyRoutes.populate(airlines, airports, flights);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (SkyRoutesException e) {
+            e.printStackTrace();
+        }
+
+        List<String> exclude = new ArrayList<String>();
+        List<String> excludeLHE = new ArrayList<String>();
+
+        System.out.println("What would you like to do?\nLeast Cost Excluding(LCE)\nLeast Hops(LH)\nLeast Hops Excluding(LHE)");
+        System.out.println("Please enter your starting destination code");
+        Scanner choiceScan = new Scanner(System.in);
+        String choice = choiceScan.next();
+
+        if(choice.equals("LCE") ||choice.equals("lce")||choice.equals("Lce")){
+            String start = startVal();
+            String end = endVal();
+            System.out.println("Please enter the city codes you'd like to avoid, type 'end' when you're done");
+            String excluded = "";
+            while(!excluded.equals("end")){
+                Scanner excludeScan = new Scanner(System.in);
+                excluded = excludeScan.next();
+                exclude.add(excluded);
+            }
+            try {
+                mySkyRoutes.leastCost(start, end, exclude);
+            } catch (SkyRoutesException e) {
+                e.printStackTrace();
+            }
+
+            if(choice.equals("LH") ||choice.equals("lh")||choice.equals("lH")){
+                String lhStart = startVal();
+                String lhEnd = endVal();
+                try {
+                    mySkyRoutes.leastHop(lhStart, lhEnd);
+                } catch (SkyRoutesException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if(choice.equals("LHE") ||choice.equals("lhe")||choice.equals("Lhe")){
+                String startLHE = startVal();
+                String endLHE = endVal();
+                System.out.println("Please enter the city codes you'd like to avoid, type 'end' when you're done");
+                String excludedLHE = "";
+                while(!excludedLHE.equals("end")){
+                    Scanner excludeScan = new Scanner(System.in);
+                    excluded = excludeScan.next();
+                    exclude.add(excluded);
+                }
+                try {
+                    mySkyRoutes.leastCost(startLHE, endLHE, excludeLHE);
+                } catch (SkyRoutesException e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            System.out.println("Not a valid option");
+        }
     }
 
+    /**
+     * This method lets you choose which part you want to run
+     *
+     * @return void
+     */
     public static void main(String[] args) {
-		partA();
+        System.out.println("Please select with part you would like try: ");
+        System.out.println("Choose from the following parts: \nPartA \nPartB \nPartC");
+        Scanner partScan = new Scanner(System.in);
+        String part = partScan.next();
 
+        if(part.equals("PartA") || part.equals("parta") || part.equals("partA")){
+            String start = startVal();
+            String end = endVal();
+            partA(start, end);
+        }
+        if(part.equals("PartB") || part.equals("partb") || part.equals("partB") || part.equals("PARTB")){
+            String start = startVal();
+            String end = endVal();
+            partB(start, end);
+        }
+        if(part.equals("PartC") || part.equals("partc") || part.equals("partC") || part.equals("PARTC")){
+            partC();
+        }
     }
 
+    /**
+     * This method takes in three values and uses them to populate the graph by adding each value in the airports as the
+     * vertex in the graph, and then uses the routes HashSet to add the edges with the values in the HashSet.
+     * @param airlines
+     * @param airports
+     * @param routes
+     * @return
+     */
     @Override
     public boolean populate(HashSet<String[]> airlines, HashSet<String[]> airports, HashSet<String[]> routes) {
-
+        // Adds every value inside airports HashSet to the graph, and creates a HashMap to be able to convert city codes
+        // to city names
         for(String[] airport:airports) {
             graphB.addVertex(airport[0]);
             cities.put(airport[0], airport[1]);
         }
 
+        // Creates a instance of CustomEdge and passes the values from routes HashSet as parameters for the CustomEdge.
+        // It then adds the edge with the corresponding vertices, and then sets the weight for each edge. Counter is
+        // there to keep track of how many edges are added
         int count = 0;
         for(String[] route: routes){
             CustomEdge myEdge = new CustomEdge(route[0], route[2], route[4], route[5]);
@@ -155,189 +262,171 @@ public class SkyRoutes implements IRoutes {
         return false;
     }
 
+    /**
+     * This method creates the shortest path algorithm and uses it on the graph with the entered from and to, it then
+     * creates a list of vertices and a list of edges. It passes the edges, vertices, and the shortest path as
+     * parameters for IRouteClass and then displays the information
+     *
+     * @param from (Start Airport)
+     * @param to (End Airport)
+     * @return iRoute
+     */
     @Override
     public IRoute leastCost(String from, String to) throws SkyRoutesException{
+        // Creates the shortest path and a list of edges and a list of vertices
         DijkstraShortestPath<String, CustomEdge> dijkstraAlg = new DijkstraShortestPath<>(graphB);
         ShortestPathAlgorithm.SingleSourcePaths<String, CustomEdge> iPaths = dijkstraAlg.getPaths(from);
-        GraphPath<String, CustomEdge> mypath = iPaths.getPath(to);
-        List<CustomEdge> myEdges = mypath.getEdgeList();
-        List<String> myVertices = mypath.getVertexList();
+        GraphPath<String, CustomEdge> shortestPath = iPaths.getPath(to);
+        List<CustomEdge> myEdges = shortestPath.getEdgeList();
+        List<String> myVertices = shortestPath.getVertexList();
 
-        IRoute myRoute2 = new IRouteClass(myEdges, myVertices, mypath);
+        IRoute iRoute = new IRouteClass(myEdges, myVertices, shortestPath);
 
-        System.out.printf("%s%7s%12s%9s%12s%8s", "Leg", "Leave","At", "On", "Arrive", "At");
-        System.out.println("");
-
-        int sum = 0;
-
-        for (int i = 0; i < myVertices.size()-1; i++) {
-            String vert = myVertices.get(i);
-            String deptCity = cities.get(myVertices.get(i));
-            String arrCity = cities.get(myVertices.get(i+1));
-            System.out.printf("%-5d%-13s%-9s%-8s%-12s%-14s ",i+1, deptCity, myEdges.get(i).getStartTime(), myEdges.get(i).getFlightNum(), arrCity, myEdges.get(i).getEndTime());
-            System.out.println("");
-            sum = sum + myEdges.get(i).getCost();
-        }
-
-        System.out.println("The total cost of this trip is: £" + sum);
-        System.out.println("The time spent in the air is: " + getAirTime(myEdges) + " minutes");
-        System.out.println("The time spend waiting is: " + getConnectingTime(myEdges));
-
-        return myRoute2;
+        display(myVertices, myEdges, iRoute);
+        return iRoute;
     }
 
-
-    public int getAirTime(List<CustomEdge> myEdges){
-        int total = 0;
-        for(CustomEdge myEdge:myEdges){
-            int hoursStart = Integer.parseInt(myEdge.getStartTime().substring(0,2));
-            int minutesStart = Integer.parseInt(myEdge.getStartTime().substring(2));
-            int hoursEnd = Integer.parseInt(myEdge.getEndTime().substring(0,2));
-            int minutesEnd = Integer.parseInt(myEdge.getEndTime().substring(2));
-
-            int totHours = 0;
-
-            if(hoursStart>hoursEnd){
-                hoursStart = 24%hoursStart;
-                totHours = hoursStart + hoursEnd;
-                totHours = totHours*60 + (minutesEnd - minutesStart);
-            }
-            else{
-                totHours = hoursEnd - hoursStart;
-                totHours = totHours*60 + (minutesEnd-minutesStart);
-            }
-
-//            System.out.println(totHours);
-
-            total =  total + totHours;
-        }
-        return total;
-    }
-
-    public int getConnectingTime(List<CustomEdge> myEdges) {
-        int total = 0;
-        for (int i = 0; i < myEdges.size()-1; i++) {
-            CustomEdge myEdge = myEdges.get(i);
-            CustomEdge myNextEdge = myEdges.get(i+1);
-            int hoursStart = Integer.parseInt(myEdge.getEndTime().substring(0, 2));
-            int minutesStart = Integer.parseInt(myEdge.getEndTime().substring(2));
-            int hoursEnd = Integer.parseInt(myNextEdge.getStartTime().substring(0, 2));
-            int minutesEnd = Integer.parseInt(myNextEdge.getStartTime().substring(2));
-
-            int totHours = 0;
-
-            if (hoursStart > hoursEnd) {
-                hoursStart = 24 % hoursStart;
-                totHours = hoursStart + hoursEnd;
-                totHours = totHours * 60 + (minutesEnd - minutesStart);
-            } else {
-                totHours = hoursEnd - hoursStart;
-                totHours = totHours * 60 + (minutesEnd - minutesStart);
-            }
-
-//            System.out.println(totHours);
-
-            total = total + totHours;
-        }
-        return total;
-    }
-
+    /**
+     * This method converts graphB into a AsUnweightedGraph to find least hops and then creates the shortest path
+     * algorithm and uses it on the graph with the entered from and to, it then creates a list of vertices and a list
+     * of edges. It passes the edges, vertices, and the shortest path as parameters for IRouteClass and then displays
+     * the information
+     *
+     * @param from (Start Airport)
+     * @param to (End Airport)
+     * @return iRoute
+     */
     @Override
     public IRoute leastHop(String from, String to) throws SkyRoutesException {
-        AsUnweightedGraph<String, CustomEdge> unweightedGraphtB = new AsUnweightedGraph<String, CustomEdge>(graphB);
-        DijkstraShortestPath<String, CustomEdge> dijkstraAlg = new DijkstraShortestPath(unweightedGraphtB);
+        // Converts graphB into a AsUnweightedGraph, and then creates the shortest path and a list of edges and a
+        // list of vertices
+        AsUnweightedGraph<String, CustomEdge> unweightedGraphB = new AsUnweightedGraph(graphB);
+        DijkstraShortestPath<String, CustomEdge> dijkstraAlg = new DijkstraShortestPath(unweightedGraphB);
         ShortestPathAlgorithm.SingleSourcePaths<String, CustomEdge> iPaths = dijkstraAlg.getPaths(from);
-        GraphPath<String, CustomEdge> myGraph = iPaths.getPath(to);
-        List<CustomEdge> myEdges = myGraph.getEdgeList();
-        List<String> myVertices = myGraph.getVertexList();
+        GraphPath<String, CustomEdge> shortestPath = iPaths.getPath(to);
+        List<CustomEdge> myEdges = shortestPath.getEdgeList();
+        List<String> myVertices = shortestPath.getVertexList();
 
-        IRoute myRoute2 = new IRouteClass(myEdges, myVertices, myGraph);
+        IRoute iRoute = new IRouteClass(myEdges, myVertices, shortestPath);
 
-        System.out.printf("Leg%7s%8s%6s%12s%8s", "Leave","At", "On", "Arrive", "At");
-        System.out.println("");
+        display(myVertices, myEdges, iRoute);
 
-        int sum = 0;
-
-        for (int i = 0; i < myVertices.size()-1; i++) {
-            String vert = myVertices.get(i);
-            String deptCity = cities.get(myVertices.get(i));
-            String arrCity = cities.get(myVertices.get(i+1));
-            System.out.printf(i+1 +"%13s%9s%8s%8s%10s", deptCity, myEdges.get(i).getStartTime(), myEdges.get(i).getFlightNum(), arrCity, myEdges.get(i).getEndTime());
-            System.out.println("");
-            sum = sum + myEdges.get(i).getCost();
-        }
-
-        System.out.println("The total cost of this trip is: £" + sum);
-        System.out.println("The time spent in the air is: " + getAirTime(myEdges) + " minutes");
-//        System.out.println("The time spend waiting is: " + getConnectingTime(myEdges));
-
-        return myRoute2;
+        return iRoute;
     }
 
+    /**
+     * This method first uses the list of indices that need to be removed to remove the vertices from the graph, and then
+     * creates the shortest path algorithm and uses it on the graph with the entered from and to, it then
+     * creates a list of vertices and a list of edges. It passes the edges, vertices, and the shortest path as
+     * parameters for IRouteClass and then displays the information
+     *
+     * @param from (Start Airport)
+     * @param to (End Airport)
+     * @return iRoute
+     */
     @Override
     public IRoute leastCost(String from, String to, List<String> excluding) throws SkyRoutesException {
+        // For each String in the excluding list, remove that string from the graph
         for(String exclude:excluding){
-            graphB.removeVertex(exclude);
-        }
+                graphB.removeVertex(exclude);
+            }
 
+        // Creates the shortest path and a list of edges and a list of vertices
         DijkstraShortestPath<String, CustomEdge> dijkstraAlg = new DijkstraShortestPath<>(graphB);
         ShortestPathAlgorithm.SingleSourcePaths<String, CustomEdge> iPaths = dijkstraAlg.getPaths(from);
+        GraphPath<String, CustomEdge> shortestPath = iPaths.getPath(to);
+        List<String> myVertices = shortestPath.getVertexList();
+        List<CustomEdge> myEdges = shortestPath.getEdgeList();
 
-        GraphPath<String, CustomEdge> mypath = iPaths.getPath(to);
+        IRoute iRoute = new IRouteClass(myEdges, myVertices, shortestPath);
 
-        List<String> myVertices = mypath.getVertexList();
-        List<CustomEdge> myEdges = mypath.getEdgeList();
-        int sum = 0;
+        display(myVertices, myEdges, iRoute);
 
-        System.out.printf("Leg%7s%8s%6s%12s%8s", "Leave","At", "On", "Arrive", "At");
-        System.out.println("");
-
-        for (int i = 0; i < myVertices.size()-1; i++) {
-            String vert = myVertices.get(i);
-            System.out.printf(i+1 +"%7s%12s%8s%5s%13s", myVertices.get(i), myEdges.get(i).getStartTime(), myEdges.get(i).getFlightNum(), myVertices.get(i+1), myEdges.get(i).getEndTime());
-            System.out.println("");
-            sum = sum + myEdges.get(i).getCost();
-        }
-
-        System.out.println("The total cost of this trip is: £" + mypath.getWeight());
-        System.out.println("The time spent in the air is: " + getAirTime(myEdges) + " minutes");
-        return null;
+        return iRoute;
     }
 
+    /**
+     * This method first uses the list of indices that need to be removed to remove the vertices from the graph, and then
+     * converts graphB into a AsUnweightedGraph to find least hops and then creates the shortest path
+     * algorithm and uses it on the graph with the entered from and to, it then creates a list of vertices and a list
+     * of edges. It passes the edges, vertices, and the shortest path as parameters for IRouteClass and then displays
+     * the information
+     * @param from
+     * @param to
+     * @param excluding
+     * @return
+     * @throws SkyRoutesException
+     */
     @Override
     public IRoute leastHop(String from, String to, List<String> excluding) throws SkyRoutesException {
-        AsUnweightedGraph<String, CustomEdge> unweightedGraphtB = new AsUnweightedGraph<String, CustomEdge>(graphB);
-        DijkstraShortestPath<String, CustomEdge> dijkstraAlg = new DijkstraShortestPath(unweightedGraphtB);
-        ShortestPathAlgorithm.SingleSourcePaths<String, CustomEdge> iPaths = dijkstraAlg.getPaths(from);
-        GraphPath<String, CustomEdge> myGraph = iPaths.getPath(to);
-        List<CustomEdge> myEdges = myGraph.getEdgeList();
-        List<String> myVertices = myGraph.getVertexList();
+        // Converts graphB into a AsUnweightedGraph, and then creates the shortest path and a list of edges and a
+        // list of vertices
+        AsUnweightedGraph<String, CustomEdge> unweightedGraphB = new AsUnweightedGraph<String, CustomEdge>(graphB);
 
+        // For each String in the excluding list, remove that string from the graph
         for(String exclude:excluding){
-            unweightedGraphtB.removeVertex(exclude);
+            unweightedGraphB.removeVertex(exclude);
         }
 
-        IRoute myRoute2 = new IRouteClass(myEdges, myVertices, myGraph);
+        DijkstraShortestPath<String, CustomEdge> dijkstraAlg = new DijkstraShortestPath(unweightedGraphB);
+        ShortestPathAlgorithm.SingleSourcePaths<String, CustomEdge> iPaths = dijkstraAlg.getPaths(from);
+        GraphPath<String, CustomEdge> shortestPath = iPaths.getPath(to);
+        List<CustomEdge> myEdges = shortestPath.getEdgeList();
+        List<String> myVertices = shortestPath.getVertexList();
 
-        System.out.printf("Leg%7s%8s%6s%12s%8s", "Leave","At", "On", "Arrive", "At");
+        IRoute iRoute = new IRouteClass(myEdges, myVertices, shortestPath);
+
+        display(myVertices, myEdges, iRoute);
+
+        return iRoute;
+    }
+
+    /**
+     * This method is purely there to avoid repeated code, it formats the code and prints it out. This method is called
+     * at the end of the above four methods
+     *
+     * @param myVertices
+     * @param myEdges
+     * @param iRoute
+     */
+    private void display(List<String> myVertices, List<CustomEdge> myEdges, IRoute iRoute){
+        System.out.printf("\n%s%7s%12s%7s%12s%12s", "Leg", "Leave","At", "On", "Arrive", "At");
         System.out.println("");
 
-        int sum = 0;
-
+        // Printing the leg, departure airport, departure time, flight no., arrival airport, arrival time
         for (int i = 0; i < myVertices.size()-1; i++) {
-            String vert = myVertices.get(i);
             String deptCity = cities.get(myVertices.get(i));
             String arrCity = cities.get(myVertices.get(i+1));
-            System.out.printf(i+1 +"%13s%9s%8s%8s%10s", deptCity, myEdges.get(i).getStartTime(), myEdges.get(i).getFlightNum(), arrCity, myEdges.get(i).getEndTime());
+            System.out.printf("%-5d%-15s%-7s%-8s%-16s%-10s ",i+1, deptCity, myEdges.get(i).getStartTime(), myEdges.get(i).getFlightNum(), arrCity, myEdges.get(i).getEndTime());
             System.out.println("");
-            sum = sum + myEdges.get(i).getCost();
         }
 
-        System.out.println("The total cost of this trip is: £" + sum);
-        System.out.println("The time spent in the air is: " + getAirTime(myEdges) + " minutes");
-//        System.out.println("The time spend waiting is: " + getConnectingTime(myEdges));
+        // Printing the times and cost
+        System.out.println("\nThe total cost of this trip is: £" + iRoute.totalCost());
+        System.out.println("The time spent in the air is: " + iRoute.airTime() + " minutes");
+        System.out.println("The time spend waiting is: " + iRoute.connectingTime() + " minutes");
+        System.out.println("Total time travelling is: " + iRoute.totalTime() + " minutes");
+    }
 
-        return myRoute2;
+    /**
+     * This method is to avoid repeated code for when entering starting destinations
+     * @return
+     */
+    private static String startVal(){
+        System.out.println("Please enter your starting destination code");
+        Scanner startScan = new Scanner(System.in);
+        return startScan.next();
+
+    }
+
+    /**
+     * This method is to avoid repeated code with entering the end destination
+     * @return
+     */
+    private static String endVal(){
+        System.out.println("Please enter your final destination code");
+        Scanner endScan = new Scanner(System.in);
+        return endScan.next();
     }
 
     @Override
