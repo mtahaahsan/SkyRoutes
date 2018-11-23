@@ -1,4 +1,3 @@
-import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
 public class CustomEdge extends DefaultWeightedEdge {
